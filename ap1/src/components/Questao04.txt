@@ -1,0 +1,68 @@
+Passamos informações entre componentes através das props, porém com 
+esse padrão de passar uma props para outro componente que esteja mais em baixo 
+na árvore de componentes, pode acabar se tornando desnecessário, pois pode ser 
+que os componentes intermediários da árvore, não precise dessas informações e 
+com o tempo fica difícil de entender onde os dados são inicializados, e atualizados. 
+
+O modo que podemos evitar prop drilling é através do ReactContext, que é 
+um hook que irá nos auxiliar a passar  dados entre a árvore de componentes sem 
+precisar passar o props manualmente em cada nível. 
+
+Primeiro temos que criar um contexto com React.createContext():
+
+import { createContext } from "react";
+const MinhaCor = createContext();
+export default MinhaCor;  
+
+Considere os componentes “FunçãoA”, “FunçãoB”, “FunçãoC” e “FunçãoD”. Para 
+passar os valores do componente pai, para o componente filho temos que criar um 
+componente Provedor, que neste caso será “FunçãoA”: 
+
+import FuncaoB from "./FuncaoB"
+import FuncaoC from "./FuncaoC"
+import MinhaCor from "./MeuContexto"
+
+const FuncaoA = () => {
+    const cor = {cor: "black", }
+    return (
+        <MinhaCor.Provider value = {cor}>
+            <div> 
+                <h1 style = {{ backgroundColor : cor.cor , color: "white"}}> Função A</h1>
+                <FuncaoB />
+                <FuncaoC />
+            </div>
+        </MinhaCor.Provider>   
+    )
+}
+
+export default FuncaoA
+
+Agora podemos dizer quais valores vamos passar para o compomente “FunçãoA”, 
+através do Provider. 
+
+A chamada do createContext devolve um objeto com dois valores, utilizamos 
+primeiro o Provider, e para pegar o valor do context precisamos de um componente 
+consumidor ou Consumer, que neste caso é o componente “FunçãoB”:
+
+import MinhaCor from "./MeuContexto"
+
+const FuncaoB = () => {
+    return (
+        <div> 
+            <MinhaCor.Consumer>
+                {
+                        ({cor}) => {
+                        return (
+                            <h1 style={{backgroundColor:cor , color: "white"}}> Função B</h1>
+                        )
+                    }
+                }
+            </MinhaCor.Consumer>
+        </div>
+    )
+}
+
+export default FuncaoB
+
+Dessa forma, podemos passar a informação “cor”, através de toda a minha árvore 
+de componentes sem precisar passar o props manualmente em cada nível, evitando o prop drilling. 
